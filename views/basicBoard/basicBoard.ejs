@@ -1,0 +1,81 @@
+<%- include ('../include/header') -%>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Writer</th>
+                <th scope="col">Day</th>
+            </tr>
+        </thead>
+        <tbody id="boardMaster">
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-info" onclick="location.href='/writeBoard'">글쓰기</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            get_all_board();
+        })
+
+        function get_all_board() {
+            var board_ajax = new XMLHttpRequest();
+            board_ajax.onload = function () {
+                if (board_ajax.status == 200 || board_ajax.status == 201) {
+                    const boardArr = JSON.parse(board_ajax.responseText)['boards'];
+
+                    for (var i = 0; i < boardArr.length; i++) {
+                        let boardId = boardArr[i]['boardId'];
+                        let title = boardArr[i]['title'];
+                        let name = boardArr[i]['name'];
+                        let passWord = boardArr[i]['passWord'];
+                        let contents = boardArr[i]['contents'];
+                        let day = boardArr[i]['day'].substring(0, 10);
+
+                        var board = document.querySelector('#boardMaster');
+
+                        var boardTable_tr = document.createElement('tr');
+
+                        var boardTable_th = document.createElement('th');
+                        boardTable_th.setAttribute('scope', 'row');
+                        var rowTxt = document.createTextNode(i + 1);
+                        boardTable_th.appendChild(rowTxt);
+
+
+                        var boardTable_td1 = document.createElement('td');
+                        var a = document.createElement("a");
+                        var titleTxt = document.createTextNode(title);
+                        a.setAttribute('href', '/readBoard/?boardId=' + boardId);
+                        a.appendChild(titleTxt);
+                        boardTable_td1.appendChild(a);
+
+
+                        var boardTable_td2 = document.createElement('td');
+                        var nameTxt = document.createTextNode(name);
+                        boardTable_td2.appendChild(nameTxt);
+
+                        var boardTable_td3 = document.createElement('td');
+                        var dayTxt = document.createTextNode(day);
+                        boardTable_td3.appendChild(dayTxt);
+
+                        boardTable_tr.appendChild(boardTable_th);
+                        boardTable_tr.appendChild(boardTable_td1);
+                        boardTable_tr.appendChild(boardTable_td2);
+                        boardTable_tr.appendChild(boardTable_td3);
+                        board.appendChild(boardTable_tr);
+
+                    }
+                }
+            }
+
+            board_ajax.onerror = function () {
+                console.error(board_ajax.responseText);
+            }
+
+            board_ajax.open('GET', '/api/board');
+            board_ajax.send();
+        }
+
+    </script>
+    <%- include ('../include/footer') -%>

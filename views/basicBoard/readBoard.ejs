@@ -1,0 +1,113 @@
+<%- include ('../include/header') -%>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">제목</span>
+        <input type="text" id='title' class="form-control" placeholder="Username" aria-label="Username"
+            aria-describedby="basic-addon1" readonly>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">작성자명</span>
+        <input type="text" id='name' class="form-control" placeholder="Username" aria-label="Username"
+            aria-describedby="basic-addon1" readonly>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">작성날짜</span>
+        <input type="text" id='day' class="form-control" placeholder="Username" aria-label="Username"
+            aria-describedby="basic-addon1" readonly>
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">내용</span>
+        <input type="text" id='contents' class="form-control" placeholder="Username" aria-label="Username"
+            aria-describedby="basic-addon1" readonly>
+    </div>
+
+    <button type="button" id="updateButton" class="btn btn-primary" onclick="chk_modal(this.id)">수정하기</button>
+    <button type="button" id="deleteButton" class="btn btn-danger" onclick="chk_modal(this.id)">삭제하기</button>
+
+    <%- include ('../include/modal') -%>
+
+
+        <script>
+            const queryString = window.location.search;
+            const urlParam = new URLSearchParams(queryString);
+            const boardId = urlParam.get('boardId');
+
+            console.log(queryString + '||' + urlParam + '||' + boardId);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                get_readBoard();
+            })
+
+            function get_readBoard() {
+                var read_ajax = new XMLHttpRequest();
+                read_ajax.onload = function () {
+                    if (read_ajax.status == 200 || read_ajax.status == 201) {
+                        console.log(read_ajax.responseText);
+                        const readBoardArr = JSON.parse(read_ajax.responseText)['readBoard'];
+                        let boardId = readBoardArr['boardId'];
+                        let title = readBoardArr['title'];
+                        let name = readBoardArr['name'];
+                        let day = readBoardArr['day'].substring(0, 10);;
+                        let contents = readBoardArr['contents'];
+                        let passWord = readBoardArr['passWord'];
+
+                        var titleInput = document.querySelector('#title');
+                        var nameInput = document.querySelector('#name');
+                        var dayInput = document.querySelector('#day');
+                        var contentsInput = document.querySelector('#contents');
+
+                        titleInput.setAttribute('value', title);
+                        nameInput.setAttribute('value', name);
+                        dayInput.setAttribute('value', day);
+                        contentsInput.setAttribute('value', contents);
+                    }
+                }
+
+                read_ajax.onerror = function () {
+                    console.error(read_ajax.responseText);
+                }
+
+                read_ajax.open('GET', '/api/readBoard/' + boardId);
+                read_ajax.send();
+            }
+
+
+
+            function chk_modal(id) {
+                var myChkModal = new bootstrap.Modal(document.getElementById("chkPassword"), {});
+                var button_id = id;
+                console.log(button_id)
+                document.onreadystatechange = function () {
+                    myChkModal.show();
+                };
+            }
+
+
+
+            function delete_blog() {
+
+                const delete_ajax = new XMLHttpRequest();
+                delete_ajax.onload = function () {
+                    if (delete_ajax.status == 200 || delete_ajax.status == 201) {
+                        document.onreadystatechange = function () {
+                            myDeleteModal.show();
+                        };
+                    } else {
+                        alert('비밀번호가 맞지 않습니다.');
+                    }
+                }
+
+                const data = {
+                    boardId: boardId
+
+                };
+
+                delete_ajax.onerror = function () {
+                    console.error(delete_ajax.responseText);
+                }
+
+                delete_ajax.open('DELETE', '/api/deleteBoard/' + boardId);
+                delete_ajax.setRequestHeader('Content-Type', 'application/json');
+                delete_ajax.send(JSON.stringify(data));
+            }
+        </script>
+        <%- include ('../include/footer') -%>
