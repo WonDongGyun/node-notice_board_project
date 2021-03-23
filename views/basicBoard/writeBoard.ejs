@@ -68,7 +68,7 @@
                 }
 
                 if (title != '' && name != '' && contents != '' && passWord != '') {
-                    write_ajax.open('POST', '/api/writeBoard/');
+                    write_ajax.open('POST', '/api/writeBoard');
                     write_ajax.setRequestHeader('Content-Type', 'application/json');
                     write_ajax.send(JSON.stringify(data));
 
