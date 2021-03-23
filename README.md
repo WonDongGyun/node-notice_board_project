@@ -62,6 +62,9 @@ node-notice_board_project
 <br/>
 <br/>
 
+주의사항 및 Tip
+==============
+
 **1. include**
 --------------
 
