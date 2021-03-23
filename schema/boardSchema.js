@@ -13,8 +13,7 @@ const boardSchema = new Schema({
     },
     name: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     passWord: {
         type: String,
@@ -22,6 +21,7 @@ const boardSchema = new Schema({
     },
     contents: {
         type: String,
+        required: true
     },
     day: {
         type: Date,

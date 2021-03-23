@@ -32,16 +32,98 @@ router.post('/writeBoard', async (req, res) => {
         const { title, name, contents, passWord } = req.body;
 
         let boardId = await board.find({}).sort("-boardId").limit(1);
-        boardId = boardId[0]['boardId'] + 1;
+
+        if (boardId.length == 0) {
+            boardId = 1
+        } else {
+            boardId = boardId[0]['boardId'] + 1;
+        }
+
         const today = new Date();
-        const day = today;
+        const utc = today.getTime() + (today.getTimezoneOffset() * 60 * 1000);
+        const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+
+        const kr_today = new Date(utc + KR_TIME_DIFF + 32400000);
+        const day = kr_today;
 
         await board.create({ boardId, title, name, passWord, contents, day });
-        res.send({ result: "success" });
+        res.send({
+            result: "success",
+            modal_title: "저장 성공",
+            modal_body: "글이 성공적으로 저장 되었습니다."
+        });
     } catch (err) {
         console.error(err);
         next(err);
     }
 })
+
+// readBoard에서 수정하기 혹은 삭제하기 
+router.post('/chkPassWord', async (req, res) => {
+    try {
+        const { boardId, passWord, nowButton } = req.body;
+        const findIdPw = await board.find({ boardId, passWord });
+
+        if (findIdPw.length > 0) {
+            if (nowButton == 'updateButton') {
+                res.send({ result: "success" });
+            } else {
+                await board.deleteOne({ boardId, passWord });
+                res.send({
+                    result: "success",
+                    modal_title: "삭제 성공",
+                    modal_body: "글이 성공적으로 삭제 되었습니다."
+                });
+            }
+        } else {
+            res.send({ result: "fail" });
+        }
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+})
+
+
+// updateBoard에서 수정하기 혹은 삭제하기 
+router.post('/updateBoard', async (req, res) => {
+    try {
+        const { boardId, title, name, contents, passWord, nowButton } = req.body;
+        const findIdPw = await board.find({ boardId });
+
+        const today = new Date();
+        const utc = today.getTime() + (today.getTimezoneOffset() * 60 * 1000);
+        const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+
+        const kr_today = new Date(utc + KR_TIME_DIFF + 32400000);
+        const day = kr_today;
+
+        if (findIdPw.length > 0) {
+            if (nowButton == 'updateButton') {
+                await board.updateOne({ boardId }, { $set: { title: title, name: name, contents: contents, passWord: passWord, day: day } });
+
+                res.send({
+                    result: "success",
+                    modal_title: "수정 성공",
+                    modal_body: "글이 성공적으로 수정 되었습니다."
+                });
+
+            } else {
+
+                await board.deleteOne({ boardId });
+                res.send({
+                    result: "success",
+                    modal_title: "삭제 성공",
+                    modal_body: "글이 성공적으로 삭제 되었습니다."
+                });
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+})
+
+
 
 module.exports = router;

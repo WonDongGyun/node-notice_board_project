@@ -1,28 +1,30 @@
 <%- include ('../include/header') -%>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">제목</span>
-        <input type="text" id='title' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly>
+        <input type="text" id='title' class="form-control" placeholder="제목을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">작성자명</span>
-        <input type="text" id='name' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly>
+        <input type="text" id='name' class="form-control" placeholder="작성자명을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">작성날짜</span>
-        <input type="text" id='day' class="form-control" aria-label="Username" aria-describedby="basic-addon1" readonly>
+        <span class="input-group-text" id="basic-addon1">비밀번호</span>
+        <input type="text" id='passWord' class="form-control" placeholder="비밀번호를 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">내용</span>
-        <input type="text" id='contents' class="form-control" aria-label="Username" aria-describedby="basic-addon1"
-            readonly>
+        <input type="text" id='contents' class="form-control" placeholder="내용을 입력해주세요." aria-label="Username"
+            aria-describedby="basic-addon1">
     </div>
 
     <button type="button" id="updateButton" class="btn btn-primary">수정하기</button>
     <button type="button" id="deleteButton" class="btn btn-danger">삭제하기</button>
 
     <%- include ('../include/modal') -%>
+
 
 
         <script>
@@ -45,7 +47,7 @@
                 get_readBoard();
             })
 
-            // 읽어야할 게시글의 정보를 가져옴
+            // 읽어야할 게시글의 정보를 가져옴 (이미 존재하는 api 활용)
             function get_readBoard() {
                 var read_ajax = new XMLHttpRequest();
                 read_ajax.onload = function () {
@@ -60,12 +62,12 @@
 
                         var titleInput = document.querySelector('#title');
                         var nameInput = document.querySelector('#name');
-                        var dayInput = document.querySelector('#day');
+                        var passWordInput = document.querySelector('#passWord');
                         var contentsInput = document.querySelector('#contents');
 
                         titleInput.setAttribute('value', title);
                         nameInput.setAttribute('value', name);
-                        dayInput.setAttribute('value', day);
+                        passWordInput.setAttribute('value', '');
                         contentsInput.setAttribute('value', contents);
                     }
                 }
@@ -83,7 +85,18 @@
             function chk_modal(id) {
                 var button_id = id;
                 var myChkModal = new bootstrap.Modal(document.getElementById("chkPassword"), {});
-                myChkModal.show();
+                var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
+
+                let title = document.getElementById('title').value;
+                let name = document.getElementById('name').value;
+                let contents = document.getElementById('contents').value;
+                let passWord = document.getElementById('passWord').value;
+
+                if (title != '' && name != '' && contents != '' && passWord != '') {
+                    myChkModal.show();
+                } else {
+                    myChkValModal.show();
+                }
             }
 
 
@@ -93,15 +106,17 @@
                 var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
                 var myWrongModal = new bootstrap.Modal(document.getElementById("wrongModal"), {});
 
+                let title = document.getElementById('title').value;
+                let name = document.getElementById('name').value;
+                let contents = document.getElementById('contents').value;
+                let passWord = document.getElementById('passWord').value;
+
                 chk_ajax.onload = function () {
                     if (chk_ajax.status == 200 || chk_ajax.status == 201) {
 
                         responseTxt = JSON.parse(chk_ajax.responseText)
 
-                        if (responseTxt['result'] == 'success' && nowButton == 'updateButton') {
-                            location.href = '/updateBoard/?boardId=' + boardId;
-
-                        } else if (responseTxt['result'] == 'success' && nowButton == 'deleteButton') {
+                        if (responseTxt['result'] == 'success') {
                             const modalTitle = document.querySelector('#msgTitle');
                             var mtTxt = document.createTextNode(responseTxt['modal_title']);
                             modalTitle.appendChild(mtTxt);
@@ -112,14 +127,15 @@
 
                             myModal.show();
 
-                        } else {
-                            myWrongModal.show();
                         }
                     }
                 }
 
                 const data = {
                     boardId: boardId,
+                    title: title,
+                    name: name,
+                    contents: contents,
                     passWord: inputPW,
                     nowButton: nowButton
                 }
@@ -128,9 +144,16 @@
                     console.error(chk_ajax.responseText);
                 }
 
-                chk_ajax.open('POST', '/api/chkPassWord');
-                chk_ajax.setRequestHeader('Content-Type', 'application/json');
-                chk_ajax.send(JSON.stringify(data));
+                if (inputPW == passWord) {
+                    chk_ajax.open('POST', '/api/updateBoard');
+                    chk_ajax.setRequestHeader('Content-Type', 'application/json');
+                    chk_ajax.send(JSON.stringify(data));
+
+                } else {
+                    myWrongModal.show();
+                }
             }
         </script>
+
+
         <%- include ('../include/footer') -%>

@@ -27,6 +27,10 @@ app.get('/writeBoard', (req, res) => {
     res.render('./basicBoard/writeBoard');
 })
 
+app.get('/updateBoard', (req, res) => {
+    res.render('./basicBoard/updateBoard');
+})
+
 
 app.listen(port, () => {
     console.log(`listening at http://localhost:${port}`);

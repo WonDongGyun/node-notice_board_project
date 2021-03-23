@@ -1,65 +1,81 @@
 <%- include ('../include/header') -%>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">제목</span>
-        <input type="text" id='title' class="form-control" placeholder="Username" aria-label="Username"
+        <input type="text" id='title' class="form-control" placeholder="제목을 입력해주세요." aria-label="Username"
             aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">작성자명</span>
-        <input type="text" id='name' class="form-control" placeholder="Username" aria-label="Username"
+        <input type="text" id='name' class="form-control" placeholder="작성자명을 입력해주세요." aria-label="Username"
             aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">비밀번호</span>
-        <input type="text" id='passWord' class="form-control" placeholder="Username" aria-label="Username"
+        <input type="text" id='passWord' class="form-control" placeholder="비밀번호를 입력해주세요." aria-label="Username"
             aria-describedby="basic-addon1">
     </div>
     <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">내용</span>
-        <input type="text" id='contents' class="form-control" placeholder="Username" aria-label="Username"
+        <input type="text" id='contents' class="form-control" placeholder="내용을 입력해주세요." aria-label="Username"
             aria-describedby="basic-addon1">
     </div>
 
 
     <button type="button" class="btn btn-info" onclick="save_blog()">글쓰기</button>
 
-    <script>
+    <%- include ('../include/modal') -%>
 
-        function save_blog() {
-            const write_ajax = new XMLHttpRequest();
-            var mySaveModal = new bootstrap.Modal(document.getElementById("saveModal"), {});
+        <script>
+            // 글쓰기 저장하기
+            function save_blog() {
+                const write_ajax = new XMLHttpRequest();
+                var myModal = new bootstrap.Modal(document.getElementById("noticeModal"), {});
+                var myChkValModal = new bootstrap.Modal(document.getElementById("chkValModal"), {});
 
-            let title = document.getElementById('title').value;
-            let name = document.getElementById('name').value;
-            let contents = document.getElementById('contents').value;
-            let passWord = document.getElementById('passWord').value;
-
-
-            const data = {
-                title: title,
-                name: name,
-                contents: contents,
-                passWord: passWord
-            };
+                let title = document.getElementById('title').value;
+                let name = document.getElementById('name').value;
+                let contents = document.getElementById('contents').value;
+                let passWord = document.getElementById('passWord').value;
 
 
-            write_ajax.onload = function () {
-                if (write_ajax.status == 200 || write_ajax.status == 201) {
-                    document.onreadystatechange = function () {
-                        mySaveModal.show();
-                    };
+                const data = {
+                    title: title,
+                    name: name,
+                    contents: contents,
+                    passWord: passWord
+                };
+
+
+                write_ajax.onload = function () {
+                    if (write_ajax.status == 200 || write_ajax.status == 201) {
+
+                        responseTxt = JSON.parse(write_ajax.responseText)
+
+                        const modalTitle = document.querySelector('#msgTitle');
+                        var mtTxt = document.createTextNode(responseTxt['modal_title']);
+                        modalTitle.appendChild(mtTxt);
+
+                        const modalBody = document.querySelector('#msgbody');
+                        var mbTxt = document.createTextNode(responseTxt['modal_body']);
+                        modalBody.appendChild(mbTxt);
+
+                        myModal.show();
+                    }
+                }
+
+                write_ajax.onerror = function () {
+                    console.error(write_ajax.responseText);
+                }
+
+                if (title != '' && name != '' && contents != '' && passWord != '') {
+                    write_ajax.open('POST', '/api/writeBoard/');
+                    write_ajax.setRequestHeader('Content-Type', 'application/json');
+                    write_ajax.send(JSON.stringify(data));
+
+                } else {
+                    myChkValModal.show();
                 }
             }
 
-            write_ajax.onerror = function () {
-                console.error(write_ajax.responseText);
-            }
-
-            write_ajax.open('POST', '/api/writeBoard/');
-            write_ajax.setRequestHeader('Content-Type', 'application/json');
-            write_ajax.send(JSON.stringify(data));
-        }
-
-    </script>
-    <%- include ('../include/modal') -%>
+        </script>
         <%- include ('../include/footer') -%>
