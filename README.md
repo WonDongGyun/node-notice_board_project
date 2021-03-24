@@ -376,3 +376,197 @@ write_ajax.send(JSON.stringify(data));
 
 <br/>
 <br/>
+
+
+
+**9. AWS에 올려보기**
+--------------
+
+<br/>
+
+1. AWS EC2 ubuntu에서 Free Tier 상품을 구매한 후, pem키를 보관해 둔다.  
+2. git bash를 설치한 후, 
+
+<br/>
+
+
+``` bash  
+ssh -i 받은키페어를끌어다놓기 ubuntu@AWS에적힌 퍼블릭 IPv4
+yes
+```
+
+<br/>
+
+3. EC2에 Node.js 설치 
+
+<br/>
+
+
+``` bash  
+1. Node.js 설치 명령어 1  
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -  
+
+2. Node.js 설치 명령어 2   
+sudo apt-get install -y nodejs
+
+node -v 와 npm -v 입력시 버전값이 나오면 성공~!   
+```
+
+<br/>
+
+
+3. EC2에 몽고DB 설치. (한번에 입력하셔도 됩니다.)
+
+
+<br/>
+
+``` bash  
+wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+
+sudo apt-get update
+
+sudo apt-get install -y mongodb-org
+```
+
+<br/>
+
+밑의 코드가 실행되었을 때, 아무 일도 발생하지 않는다면 정상적으로 설치가 된 것입니다.  
+
+<br/>
+
+``` bash  
+sudo service mongod start
+```
+
+
+<br/>
+
+몽고 DB로 접속해주시고, 계정을 바꿔주세요.  
+바꾸셨다면 몽고DB에서 나와서 몽고DB를 재시작해줍시다.  
+
+<br/>
+
+
+``` bash  
+mongo
+
+use admin;
+
+db.createUser({user: "원하는 ID", pwd: "원하는 PW", roles:["root"]});
+
+exit;
+
+sudo service mongod restart
+```
+
+
+<br/>
+
+
+4. 몽고DB 개방 
+
+<br/>
+
+몽고DB를 외부에 개방해봅시다. vi에디터로 접속해 그림과 같이 내용을 바꿔줍시다.  
+
+<br/>
+
+
+``` bash  
+sudo vi /etc/mongod.conf
+```
+
+
+<br/>
+
+<p align="center"><img src="https://user-images.githubusercontent.com/52685665/112260200-daea8c00-8cac-11eb-92c1-9aebec2a8bdc.png"></p>
+
+<br/>
+
+수정하셨다면 ESC키를 입력후, :wq를 입력해서 에디터를 종료하고 재시작해줍시다.  
+
+``` bash  
+sudo service mongod restart
+```
+
+<br/>
+
+재시작이 끝났다면, Robo 3T에서 접속정보를 세팅합니다.  
+Name값은 아무거나 입력해도 상관없으며, 주소값은 AWS IPv4 값을 입력하시면 됩니다.  
+Authentication 탭에서 Perform authentication 체크박스를 클릭하고,  
+Database는 admin, user name과 pw는 위에서 설정한대로 입력해줍시다.  
+
+<br/>
+
+5. AWS 포트 개방
+
+<br/>
+
+Filezilla에서  
+- SFTP 프로토콜 선택  
+- 호스트 AWS 퍼블릭 IPV4로 설정  
+- 로그온 유형 키파일로 설정 (키파일을 pem키 파일)  
+- 사용자 ubuntu로 설정  
+
+순서대로 작업을 해줍니다.  
+위의 작업이 끝나면 FileZila로 프로젝트 파일을 AWS 환경으로 옮깁니다.  
+
+<br/>
+
+그 후, ls -la로 폴더 확인을 하셔서 프로젝트 폴더로 이동해주세요.  
+프로젝트 모듈들은 node_modules에 있지만, 혹시 누락됐을 지도 모르기 때문에 한 번더 설치해보겠습니다.  
+
+<br/>
+
+``` bash  
+npm install
+```
+
+<br/>
+
+마지막으로 관리자 권한으로 이동해서, pm2를 실행시키고 프로젝트.js를 실행시키면 끝!  
+
+<br/>
+
+``` bash  
+sudo -s
+
+npm install -g pm2
+
+pm2 start app.js
+```
+
+
+
+
+<br/>
+
+마지막으로 AWS에 해당 서비스를 올리고 싶으시다면, dbconnect.js의 connect 부분을 다음과 같이 바꿔주시면 됩니다.  
+
+<br/>
+
+```javascript
+const mongoose = require("mongoose");
+const connect = () => {
+  mongoose
+    .connect("mongodb://localhost:27017/admin", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      ignoreUndefined: true,
+      user: "AWS 가상환경에서 설정한 user id",
+      pass: "AWS 가상환경에서 설정한 user pw"
+    })
+    .catch(err => console.log(err));
+};
+mongoose.connection.on("error", err => {
+  console.error("몽고디비 연결 에러", err);
+});
+module.exports = connect;
+```  
+
+<br/>
+
+
