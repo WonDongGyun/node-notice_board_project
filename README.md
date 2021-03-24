@@ -384,8 +384,9 @@ write_ajax.send(JSON.stringify(data));
 
 <br/>
 
-1. AWS EC2 ubuntu에서 Free Tier 상품을 구매한 후, pem키를 보관해 둔다.  
-2. git bash를 설치한 후, 
+**1. AWS EC2 ubuntu에서 Free Tier 상품을 구매한 후, pem키를 보관해 둔다.**  
+
+**2. git bash를 설치한 후,**  
 
 <br/>
 
@@ -397,7 +398,7 @@ yes
 
 <br/>
 
-3. EC2에 Node.js 설치 
+**3. EC2에 Node.js 설치**  
 
 <br/>
 
@@ -415,7 +416,7 @@ node -v 와 npm -v 입력시 버전값이 나오면 성공~!
 <br/>
 
 
-3. EC2에 몽고DB 설치. (한번에 입력하셔도 됩니다.)
+**4. EC2에 몽고DB 설치. (한번에 입력하셔도 됩니다.)**  
 
 
 <br/>
@@ -465,7 +466,7 @@ sudo service mongod restart
 <br/>
 
 
-4. 몽고DB 개방 
+**5. 몽고DB 개방**  
 
 <br/>
 
@@ -500,7 +501,7 @@ Database는 admin, user name과 pw는 위에서 설정한대로 입력해줍시�
 
 <br/>
 
-5. AWS 포트 개방
+**6. AWS 포트 개방**  
 
 <br/>
 
