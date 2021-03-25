@@ -571,3 +571,19 @@ module.exports = connect;
 <br/>
 
 
+
+
+<br/>
+<br/>
+
+**7. 시간 조절**  
+
+<br/>
+
+AWS에서 구매한 서버의 시간이 우리 시간보다 +9시간 빠른 경우가 존재합니다.  
+그래서 이 프로젝트의 코드는 몽고DB에 day값을 넣어줄 때 추가로 연산을 해서 넣어주는데,  
+AWS에서는 추가 작업 없이 그냥 new Date()를 선언한 값을 시간으로 사용하시면 됩니다.  
+
+[참고](https://github.com/beadoer1/TIL/blob/main/OS/linux/ubuntu_timezone.md)
+
+<br/>
