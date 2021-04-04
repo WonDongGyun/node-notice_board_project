@@ -3,6 +3,9 @@
 로그인 없는 게시판 만들기 프로젝트  
 꼭 필요한 부트스트랩 CSS만 적용하였습니다.  
 
+No login board Project  
+use Express, ejs, mongoose, bootstrap v5, vanilla js  
+
 <br/>
 
 사용한 패키지 및 CSS  
